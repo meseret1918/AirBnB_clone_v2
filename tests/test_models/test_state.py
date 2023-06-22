@@ -1,39 +1,59 @@
 #!/usr/bin/python3
-"""Unittest for state file: class and methods"""
 
-import pep8
 import unittest
-from models import state
+import os
+import pep8
 from models.state import State
+from models.base_model import BaseModel
 
 
-class TestBaseModelpep8(unittest.TestCase):
-    """Validate pep8"""
+class TestState(unittest.TestCase):
 
-    def test_pep8(self):
-        """test for base file and test_base file pep8"""
+    @classmethod
+    def setUpClass(cls):
+        cls.state1 = State()
+        cls.state1.name = "North_Carolina_AKA_THE_BEST_STATE"
+
+    @classmethod
+    def tearDownClass(cls):
+        del cls.state1
+        try:
+            os.remove("file.json")
+        except FileNotFoundError:
+            pass
+
+    def test_style_check(self):
+        """
+        Tests pep8 style
+        """
         style = pep8.StyleGuide(quiet=True)
-        state_pep8 = "models/state.py"
-        test_state_pep8 = "tests/test_models/test_state.py"
-        result = style.check_files([state_pep8, test_state_pep8])
-        self.assertEqual(result.total_errors, 0)
+        p = style.check_files(['models/state.py'])
+        self.assertEqual(p.total_errors, 0, "fix pep8")
 
+    def test_is_subclass(self):
+        self.assertTrue(issubclass(self.state1.__class__, BaseModel), True)
 
-class TestDocsBaseModel(unittest.TestCase):
-    """test docstrings for base and test_base files"""
+    def test_checking_for_functions(self):
+        self.assertIsNotNone(State.__doc__)
 
-    def test_module(self):
-        """check module docstrings"""
-        self.assertTrue(len(state.__doc__) > 0)
+    def test_has_attributes(self):
+        self.assertTrue('id' in self.state1.__dict__)
+        self.assertTrue('created_at' in self.state1.__dict__)
+        self.assertTrue('updated_at' in self.state1.__dict__)
+        self.assertTrue('name' in self.state1.__dict__)
 
-    def test_class(self):
-        """check class docstrings"""
-        self.assertTrue(len(State.__doc__) > 0)
+    def test_attributes_are_strings(self):
+        self.assertEqual(type(self.state1.name), str)
 
-    def test_method(self):
-        """check method docstrings"""
-        for func in dir(State):
-            self.assertTrue(len(func.__doc__) > 0)
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') == 'db',
+        "won't work in db")
+    def test_save(self):
+        self.state1.save()
+        self.assertNotEqual(self.state1.created_at, self.state1.updated_at)
+
+    def test_to_dict(self):
+        self.assertEqual('to_dict' in dir(self.state1), True)
 
 
 if __name__ == "__main__":
