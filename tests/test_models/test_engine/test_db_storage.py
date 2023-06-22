@@ -1,54 +1,70 @@
 #!/usr/bin/python3
-
+"""test for file storage"""
 import unittest
-import models
-from models.base_model import BaseModel, Base
-from models.user import User
-from models.review import Review
-from models.amenity import Amenity
+from os import getenv
+import MySQLdb
 from models.state import State
-from models.place import Place
-from models.city import City
-import os
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.orm import sessionmaker
+from models.engine.db_storage import DBStorage
 
 
-@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',
-                 "only testing db storage")
-class test_DBStorage(unittest.TestCase):
+@unittest.skipIf(getenv("HBNB_TYPE_STORAGE") != 'db', 'Not db storage')
+class TestDBStorage(unittest.TestCase):
+    '''this will test the DBStorage'''
 
-    def testState(self):
-        state = State(name="Gregory")
-        if state.id in models.storage.all():
-            self.assertTrue(state.name, "Gregory")
+    @classmethod
+    def setUpClass(self):
+        """set up for test"""
+        self.User = getenv("HBNB_MYSQL_USER")
+        self.Passwd = getenv("HBNB_MYSQL_PWD")
+        self.Db = getenv("HBNB_MYSQL_DB")
+        self.Host = getenv("HBNB_MYSQL_HOST")
+        self.db = MySQLdb.connect(host=self.Host, user=self.User,
+                                  passwd=self.Passwd, db=self.Db,
+                                  charset="utf8")
+        self.query = self.db.cursor()
+        self.storage = DBStorage()
+        self.storage.reload()
 
-    def testCity(self):
-        city = City(name="Delhi")
-        if city.id in models.storage.all():
-            self.assertTrue(city.name, "Delhi")
-
-    def testPlace(self):
-        place = Place(name="matchstick apartment", number_rooms=5)
-        if place.id in models.storage.all():
-            self.assertTrue(place.number_rooms, 5)
-            self.assertTrue(place.name, "matchstick apartment")
-
-    def testUser(self):
-        user = User(name="Hail the lord")
-        if user.id in models.storage.all():
-            self.assertTrue(user.name, "Hail the lord")
-
-    def testAmenity(self):
-        amenity = Amenity(name="Toilet")
-        if amenity.id in models.storage.all():
-            self.assertTrue(amenity.name, "Bathtub")
-
-    def testReview(self):
-        review = Review(text="hello")
-        if review.id in models.storage.all():
-            self.assertTrue(review.text, "Whaddup")
-
+    @classmethod
     def teardown(self):
-        self.session.close()
-        self.session.rollback()
+        """at the end of the test this will tear it down"""
+        self.query.close()
+        self.db.close()
+
+    @unittest.skipIf(getenv("HBNB_TYPE_STORAGE") != 'db', 'Not db storage')
+    def test_read_tables(self):
+        """existing tables"""
+        self.query.execute("SHOW TABLES")
+        salida = self.query.fetchall()
+        self.assertEqual(len(salida), 7)
+
+    @unittest.skipIf(getenv("HBNB_TYPE_STORAGE") != 'db', 'Not db storage')
+    def test_no_element_user(self):
+        """no elem in users"""
+        self.query.execute("SELECT * FROM users")
+        salida = self.query.fetchall()
+        self.assertEqual(len(salida), 0)
+
+    @unittest.skipIf(getenv("HBNB_TYPE_STORAGE") != 'db', 'Not db storage')
+    def test_no_element_cities(self):
+        """no elem in cities"""
+        self.query.execute("SELECT * FROM cities")
+        salida = self.query.fetchall()
+        self.assertEqual(len(salida), 0)
+
+    @unittest.skipIf(getenv("HBNB_TYPE_STORAGE") != 'db', 'Not db storage')
+    def test_add(self):
+        """Test same size between storage() and existing db"""
+        self.query.execute("SELECT * FROM states")
+        query_rows = self.query.fetchall()
+        self.assertEqual(len(query_rows), 0)
+        state = State(name="Ebonyi")
+        state.save()
+        self.db.autocommit(True)
+        self.query.execute("SELECT * FROM states")
+        query_rows = self.query.fetchall()
+        self.assertEqual(len(query_rows), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
