@@ -1,22 +1,18 @@
 #!/usr/bin/python3
-'''
-    Define the class City.
-'''
+""" City Module for HBNB project """
+import models
 from models.base_model import BaseModel, Base
-from sqlalchemy import String, Column, ForeignKey
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
-import os
 
 
 class City(BaseModel, Base):
-    '''
-        Define the class City that inherits from BaseModel.
-    '''
-    __tablename__ = 'cities'
-    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
-        state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
+    """ The city class, contains state ID and name """
+    if models.is_type == "db":
+        __tablename__ = 'cities'
         name = Column(String(128), nullable=False)
-        places = relationship("Place", passive_deletes=True, backref="cities")
+        state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
+        places = relationship('Place', backref='cities', cascade='delete')
     else:
         state_id = ""
         name = ""

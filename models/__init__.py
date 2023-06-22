@@ -1,26 +1,18 @@
 #!/usr/bin/python3
-'''
-    Package initializer
-'''
+"""
+This module instantiates a FileStorage class object
+"""
+# from models.base_model import BaseModel, Base
+from os import getenv
 
-from models.engine.file_storage import FileStorage
-from models.base_model import BaseModel
-from models.user import User
-from models.place import Place
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.review import Review
-import os
 
-classes = {"User": User, "BaseModel": BaseModel,
-           "Place": Place, "State": State,
-           "City": City, "Amenity": Amenity,
-           "Review": Review}
+is_type = getenv("HBNB_TYPE_STORAGE")
 
-if os.getenv('HBNB_TYPE_STORAGE') == 'db':
+if is_type == 'db':
     from models.engine.db_storage import DBStorage
     storage = DBStorage()
 else:
+    from models.engine.file_storage import FileStorage
     storage = FileStorage()
+
 storage.reload()
