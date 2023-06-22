@@ -1,4 +1,4 @@
--- Preparar un servidor MySQL para el proyecto
+-- Environment variables will be your best friend for this project!
 CREATE DATABASE IF NOT EXISTS hbnb_dev_db;
 CREATE USER IF NOT EXISTS 'hbnb_dev'@'localhost' IDENTIFIED BY 'hbnb_dev_pwd';
 GRANT ALL PRIVILEGES ON hbnb_dev_db.* TO 'hbnb_dev'@'localhost';
