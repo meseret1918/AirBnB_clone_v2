@@ -73,7 +73,7 @@ file { '/var/www/html':
 
 file { '/var/www/html/index.html':
   ensure  => 'present',
-  content => "Holberton School Nginx\n"
+  content => "hello world test Nginx\n"
 } ->
 
 file { '/var/www/html/404.html':
