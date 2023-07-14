@@ -81,7 +81,7 @@ file { '/var/www/html/404.html':
   content => "Ceci n'est pas une page\n"
 } ->
 
-file { '/etc/nginx/sites-available/default':
+file { '/etc/nginx/sites-enabled/default':
   ensure  => 'present',
   content => $nginx_conf
 } ->
