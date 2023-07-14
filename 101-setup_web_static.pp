@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Script that configures Nginx server with some folders and files
 
 exec {'update':
@@ -33,7 +32,7 @@ exec {'create second directory':
 
 exec {'content into html':
   provider => shell,
-  command  => 'echo "hello world test" | sudo tee /data/web_static/releases/test/index.html',
+  command  => 'echo "Holberton School" | sudo tee /data/web_static/releases/test/index.html',
   before   => Exec['symbolic link'],
 }
 
@@ -45,7 +44,7 @@ exec {'symbolic link':
 
 exec {'put location':
   provider => shell,
-  command  => 'sudo sed -i \'38i\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t\tautoindex off;\n\t}\n\' /etc/nginx/sites-enabled/default',
+  command  => 'sudo sed -i \'38i\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t\tautoindex off;\n\t}\n\' /etc/nginx/sites-available/default',
   before   => Exec['restart Nginx'],
 }
 
