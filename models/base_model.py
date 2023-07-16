@@ -70,7 +70,7 @@ class BaseModel:
         """
         models.storage.delete(self)
 
-    def to_dict(self):
+        def to_dict(self):
         """creates dictionary of the class  and returns
         Return:
             returns a dictionary of all the key values in __dict__
