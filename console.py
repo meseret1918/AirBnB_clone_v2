@@ -2,7 +2,6 @@
 """ Console Module """
 import cmd
 import sys
-import re
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -11,7 +10,6 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-from sqlalchemy import Column, String
 
 
 class HBNBCommand(cmd.Cmd):
@@ -75,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] == '{' and pline[-1] == '}'\
+                    if pline[0] is '{' and pline[-1] is'}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -115,43 +113,57 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        pattern = """(^\w+)((?:\s+\w+=[^\s]+)+)?"""
-        m = re.match(pattern, args)
-        args = [s for s in m.groups() if s] if m else []
+    def do_create(self, arg):
+        """Create a new object of a specified class with given parameters
+        Usage: create <Class name> <param 1> <param 2> <param 3>...
+        Param syntax: <key name>=<value>
+        Value syntax:
+        - String: "<value>" => starts with a double quote
+        all underscores _ must be replace by spaces
+        """
+        try:
+            if not arg:
+                raise SyntaxError()
+            my_list = arg.split(" ")  # split cmd line into list
 
-        if not args:
-            print("** class name missing **")
-            return
+            if my_list:  # if list not empty
+                cls_name = my_list[0]  # extract class name
+            else:  # class name missing
+                raise SyntaxError()
 
-        className = args[0]
+            kwargs = {}
 
-        if className not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        kwargs = dict()
-        if len(args) > 1:
-            params = args[1].split(" ")
-            params = [param for param in params if param]
-            for param in params:
-                [name, value] = param.split("=")
-                if value[0] == '"' and value[-1] == '"':
-                    value = value[1:-1].replace('_', ' ')
-                elif '.' in value:
-                    value = float(value)
+            for pair in my_list[1:]:
+                k, v = pair.split("=")
+                if self.is_int(v):
+                    kwargs[k] = int(v)
+                elif self.is_float(v):
+                    kwargs[k] = float(v)
                 else:
-                    value = int(value)
-                kwargs[name] = value
+                    v = v.replace('_', ' ')
+                    kwargs[k] = v.strip('"\'')
 
-        new_instance = HBNBCommand.classes[className]()
-        
-        for attrName, attrValue in kwargs.items():
-            setattr(new_instance, attrName, attrValue) 
+            obj = self.all_classes[cls_name](**kwargs)
+            storage.new(obj)  # store new object
+            obj.save()  # save storage to file
+            print(obj.id)  # print id of created object class
 
-        new_instance.save()
-        print(new_instance.id)
+        except SyntaxError:
+            print("** class name missing **")
+        except KeyError:
+            print("** class doesn't exist **")
+    # def do_create(self, args):
+    #     """ Create an object of any class"""
+    #     if not args:
+    #         print("** class name missing **")
+    #         return
+    #     elif args not in HBNBCommand.classes:
+    #         print("** class doesn't exist **")
+    #         return
+    #     new_instance = HBNBCommand.classes[args]()
+    #     storage.save()
+    #     print(new_instance.id)
+    #     storage.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -233,7 +245,7 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage.all().items():
+            for k, v in storage._FileStorage__objects.items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
@@ -299,7 +311,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] == '\"':  # check for quoted arg
+            if args and args[0] is '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -307,10 +319,10 @@ class HBNBCommand(cmd.Cmd):
             args = args.partition(' ')
 
             # if att_name was not quoted arg
-            if not att_name and args[0] != ' ':
+            if not att_name and args[0] is not ' ':
                 att_name = args[0]
             # check for quoted val arg
-            if args[2] and args[2][0] == '\"':
+            if args[2] and args[2][0] is '\"':
                 att_val = args[2][1:args[2].find('\"', 1)]
 
             # if att_val was not quoted arg
