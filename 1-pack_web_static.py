@@ -2,6 +2,7 @@
 
 from fabric.api import local
 from datetime import datetime
+import getpass
 
 def do_pack():
     """Generates a .tgz archive from the contents of the web_static folder."""
@@ -11,10 +12,10 @@ def do_pack():
     archive_path = "versions/" + archive_name
 
     local("mkdir -p versions")
-    result = local("tar -czvf {} web_static".format(archive_path))
+    password = getpass.getpass("Enter your password: ")
+    result = local("tar -czvf {} web_static/*".format(archive_path), password=password)
 
     if result.failed:
         return None
     else:
         return archive_path
-
