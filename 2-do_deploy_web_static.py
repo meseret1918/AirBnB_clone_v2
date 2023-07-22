@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Fabric script based on the file 1-pack_web_static.py that distributes an
-archive to the web servers
-"""
 from fabric.api import env, put, run
 from os.path import exists
 
@@ -15,6 +11,9 @@ def do_deploy(archive_path):
         return False
 
     try:
+        # Create the directory /data/web_static/releases/web_static_20230722080559
+        run('mkdir -p /data/web_static/releases/web_static_20230722080559')
+
         # Upload the archive to the /tmp/ directory of the web server
         put(archive_path, '/tmp/')
 
@@ -26,6 +25,11 @@ def do_deploy(archive_path):
 
         # Delete the archive from the web server
         run('rm /tmp/{}'.format(archive_filename))
+
+        # Delete the existing directories if they exist
+        run('rm -rf {}/web_static/images'.format(release_folder))
+        run('rm -rf {}/web_static/styles'.format(release_folder))
+        run('rm -rf {}/web_static/versions'.format(release_folder))
 
         # Move the contents of the extracted folder to the appropriate location
         run('mv {}/web_static/* {}'.format(release_folder, release_folder))
@@ -43,4 +47,6 @@ def do_deploy(archive_path):
         return True
     except:
         return False
+
+# Usage: do_deploy('/path/to/archive.tar.gz')
 
