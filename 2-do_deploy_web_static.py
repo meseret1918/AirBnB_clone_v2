@@ -1,8 +1,4 @@
-#!/usr/bin/python3
-"""
-Fabric script based on the file 1-pack_web_static.py that distributes an
-archive to the web servers
-"""
+#!/usr/bin/env python3
 from fabric.api import env, put, run
 from os.path import exists
 
