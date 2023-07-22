@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" 0x03. AirBnB clone - Deploy static, task"""
+""" 0x03. AirBnB clone - Deploy"""
 from fabric.api import env, put, run
 from os import path
 
@@ -32,6 +32,7 @@ def do_deploy(archive_path):
 
         print('New version deployed!')
         return True
-    except:
+    except Exception as e:
+        print('Error during deployment:', str(e))
         return False
 
