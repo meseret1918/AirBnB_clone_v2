@@ -1,3 +1,2 @@
-   from flask import Flask
-
-   app = Flask(__name__)
+#!/usr/bin/python3
+"""Initializes application"""
