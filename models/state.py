@@ -21,12 +21,22 @@ class State(BaseModel, Base):
             backref='state'
         )
     else:
+       # @property
+        #def cities(self):
+            #"""Returns the cities in this State"""
+           # from models import storage
+            #cities_in_state = []
+           # for value in storage.all(City).values():
+              #  if value.state_id == self.id:
+             #       cities_in_state.append(value)
+            #return cities_in_state
         @property
         def cities(self):
-            """Returns the cities in this State"""
             from models import storage
-            cities_in_state = []
-            for value in storage.all(City).values():
-                if value.state_id == self.id:
-                    cities_in_state.append(value)
-            return cities_in_state
+            from models.city import City
+            city_list = []
+            for city in storage.all(City).values():
+                if city.state_id == self.id:
+                    city_list.append(city)
+                    return city_list
+

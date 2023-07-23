@@ -63,7 +63,5 @@ class FileStorage:
                 temp = json.load(file)
                 for key, val in temp.items():
                     self.all()[key] = classes[val['__class__']](**val)
-
-    def close(self):
-        """Closes the storage engine."""
-        self.reload()
+                    def close(self):
+                        self.reload()

@@ -88,3 +88,6 @@ class DBStorage:
     def close(self):
         """Closes the storage engine."""
         self.__session.close()
+        def close(self):
+            self.__session.remove()
+
