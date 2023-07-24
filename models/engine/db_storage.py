@@ -12,12 +12,7 @@ class DBStorage:
     Database storage class
     """
 
-    ... os.getenv("HBNB_MYSQL_HOST")
-        database = os.getenv("HBNB_MYSQL_DB")
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
-                                      format(user, password, host, database),
-                                      pool_pre_ping=True)
-        if ... os.getenv("HBNB_ENV") == "test":
+    ... ... os.getenv("HBNB_ENV") == "test":
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
@@ -27,14 +22,14 @@ class DBStorage:
         objects = {}
         if cls:
             query = self.__session.query(cls).all()
-            for obj ... in query:
+            for obj in query:
                 key = "{}.{}".format(type(obj).__name__, obj.id)
                 objects[key] = obj
         else:
             for cls in Base.__subclasses__():
                 query = self.__session.query(cls).all()
                 for obj in query:
-                    key = ... "{}.{}".format(type(obj).__name__, obj.id)
+                    key = "{}.{}".format(type(obj).__name__, obj.id)
                     objects[key] = obj
         return objects
 
@@ -46,7 +41,7 @@ class DBStorage:
 
     def save(self):
         """
-        Commits all changes ... to the current database session
+        Commits all changes to the current database session
         """
         self.__session.commit()
 
@@ -59,18 +54,16 @@ class DBStorage:
 
     def reload(self):
         """
-        Creates all tables in the database and
-  ... creates the current database session
+        Creates all tables in the database and creates the current database session
         """
         Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine,
-                                       expire_on_commit=False)
+        session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
         Session = scoped_session(session_factory)
         self.__session = Session()
 
     def close(self):
         """
-        Calls the remove method on the ... private session attribute (self.__session)
+        Calls the remove method on the private session attribute (self.__session)
         """
         self.__session.remove()
 
