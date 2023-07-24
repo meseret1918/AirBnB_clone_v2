@@ -1,31 +1,42 @@
 #!/usr/bin/python3
-"""
-State module
-"""
-from models.base_model import BaseModel, Base
+"""This is the state class"""
+
+import models
+from models.base_model import BaseModel
+from models.base_model import Base
+from os import getenv
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from models import storage
 
 
 class State(BaseModel, Base):
-    """
-    State class
+    """This is the class for State
+    Attributes:
+        state_id: The state id
+        name: input name
     """
 
-    __tablename__ = 'states'
+    """This init method allows the class to access BaseModel's attributes"""
+
+    __tablename__ = "states"
     name = Column(String(128), nullable=False)
     cities = relationship("City", backref="state", cascade="all, delete")
 
-    @property
-    def cities(self):
-        """
-        Returns the list of City objects from storage linked to the current State
-        """
-        if storage.__class__.__name__ != "DBStorage":
-            city_list = []
-            for city in storage.all(City).values():
-                if city.state_id == self.id:
-                    city_list.append(city)
-            return city_list
+    if getenv("HBNB_TYPE_STORAGE", None) != "db":
 
+        @property
+        def cities(self):
+            """
+            Returns the list of City instances with state_id equals to the
+            current State.id as private
+            """
+            c_list = []
+
+            all_cities = models.storage.all("City")
+
+            for key, value in all_cities.items():
+
+                if value.__dict__.get('state_id') == self.id:
+                    c_list.append(value)
+
+            return (c_list)
