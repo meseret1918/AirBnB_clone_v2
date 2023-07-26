@@ -1,42 +1,34 @@
 #!/usr/bin/python3
-"""This is the state class"""
-
-import models
-from models.base_model import BaseModel
-from models.base_model import Base
-from os import getenv
+""" State Module for HBNB project """
+from models.base_model import BaseModel, Base
+from models.city import City
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
+from os import getenv
 
 
 class State(BaseModel, Base):
-    """This is the class for State
-    Attributes:
-        state_id: The state id
-        name: input name
-    """
+    """ State class """
+    __tablename__ = 'states'
+    if getenv("HBNB_TYPE_STORAGE") == 'db':
+        name = Column(String(128), nullable=False)
+        cities = relationship('City', backref='state',
+                              cascade='all, delete, delete-orphan')
+    else:
+        name = ""
 
-    """This init method allows the class to access BaseModel's attributes"""
+    def __init__(self, *args, **kwargs):
+        """initializes state"""
+        super().__init__(*args, **kwargs)
 
-    __tablename__ = "states"
-    name = Column(String(128), nullable=False)
-    cities = relationship("City", backref="state", cascade="all, delete")
-
-    if getenv("HBNB_TYPE_STORAGE", None) != "db":
-
+    if getenv('HBNB_TYPE_STORAGE') != 'db':
         @property
         def cities(self):
-            """
-            Returns the list of City instances with state_id equals to the
-            current State.id as private
-            """
-            c_list = []
-
-            all_cities = models.storage.all("City")
-
-            for key, value in all_cities.items():
-
-                if value.__dict__.get('state_id') == self.id:
-                    c_list.append(value)
-
-            return (c_list)
+            """relationship between city and state"""
+            from models import storage
+            new_city = []
+            all_cities = storage.all(City)
+            for city in all_cities.values():
+                if city.state_id == self.id:
+                    new_city.append(city)
+            return new_city
